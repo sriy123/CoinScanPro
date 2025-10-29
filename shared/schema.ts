@@ -19,15 +19,17 @@ export type User = typeof users.$inferSelect;
 
 // Coin analysis response schema
 export const coinAnalysisSchema = z.object({
-  coinType: z.string(),
-  country: z.string(),
-  countryFlag: z.string(),
-  denomination: z.string(),
+  isCoin: z.boolean(),
+  actualObject: z.string().optional(),
+  coinType: z.string().optional(),
+  country: z.string().optional(),
+  countryFlag: z.string().optional(),
+  denomination: z.string().optional(),
   year: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   confidence: z.number().min(0).max(100).optional(),
   material: z.string().optional(),
-  value: z.number(),
-  currency: z.string(),
+  value: z.number().optional(),
+  currency: z.string().optional(),
   condition: z.string().optional(),
   rarity: z.string().optional(),
   estimatedValue: z.number().optional(),

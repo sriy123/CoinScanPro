@@ -40,6 +40,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const systemPrompt = `You are an expert numismatist (coin expert) who can identify coins from images and estimate their collector value, even when coins are dirty, worn, corroded, or in poor physical condition.
 
+FIRST: Determine if the image actually shows a coin or currency. If it's clearly NOT a coin (e.g., an animal, person, food, object, etc.), set isCoin to false and describe what it actually is in the actualObject field.
+
+If it IS a coin, set isCoin to true and proceed with full analysis.
+
 IMPORTANT: Look past dirt, tarnish, corrosion, and wear to identify the underlying coin. Focus on:
 - Visible text, numbers, or letters (even if faint or partially obscured)
 - Overall size and shape
@@ -49,7 +53,13 @@ IMPORTANT: Look past dirt, tarnish, corrosion, and wear to identify the underlyi
 
 Even dirty or damaged coins can be valuable if they are old or rare. Do not dismiss a coin's value just because it appears worn.
 
-Analyze the coin image and provide detailed information in JSON format with these exact fields:
+Analyze the image and provide detailed information in JSON format with these exact fields:
+
+REQUIRED FIELDS (always include):
+- isCoin: boolean - true if it's a coin/currency, false if it's something else
+- actualObject: string - if isCoin is false, describe what the object actually is (e.g., "a donkey", "a car", "a person", "food")
+
+IF IT IS A COIN (isCoin = true), also include:
 - coinType: the specific name/type of the coin (e.g., "Quarter Dollar", "1 Rupee Coin", "50 Euro Cent")
 - country: the country of origin (e.g., "United States", "India", "European Union")
 - countryFlag: the emoji flag for the country (e.g., "🇺🇸", "🇮🇳", "🇪🇺")
@@ -96,6 +106,8 @@ Be as accurate as possible. If you cannot identify the coin clearly due to damag
           responseSchema: {
             type: "object",
             properties: {
+              isCoin: { type: "boolean" },
+              actualObject: { type: "string" },
               coinType: { type: "string" },
               country: { type: "string" },
               countryFlag: { type: "string" },
@@ -114,7 +126,7 @@ Be as accurate as possible. If you cannot identify the coin clearly due to damag
                 items: { type: "string" }
               },
             },
-            required: ["coinType", "country", "countryFlag", "denomination", "value", "currency"],
+            required: ["isCoin"],
           },
         },
         contents: contents,

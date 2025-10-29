@@ -41,10 +41,18 @@ export default function Home() {
         setCoinData(result);
         setIsAnalyzing(false);
         
-        toast({
-          title: "Coin Identified!",
-          description: `Found: ${result.coinType}`,
-        });
+        if (result.isCoin) {
+          toast({
+            title: "Coin Identified!",
+            description: `Found: ${result.coinType}`,
+          });
+        } else {
+          toast({
+            title: "Not a Coin",
+            description: `This appears to be ${result.actualObject}`,
+            variant: "destructive",
+          });
+        }
       } catch (error) {
         console.error('Error analyzing coin:', error);
         setIsAnalyzing(false);
@@ -117,25 +125,53 @@ export default function Home() {
               </div>
             ) : coinData ? (
               <>
-                <CoinResults
-                  imageUrl={uploadedImage}
-                  coinType={coinData.coinType}
-                  country={coinData.country}
-                  countryFlag={coinData.countryFlag}
-                  denomination={coinData.denomination}
-                  year={coinData.year}
-                  confidence={coinData.confidence}
-                  material={coinData.material}
-                  condition={coinData.condition}
-                  rarity={coinData.rarity}
-                  estimatedValue={coinData.estimatedValue}
-                  estimatedValueRange={coinData.estimatedValueRange}
-                  valueFactors={coinData.valueFactors}
-                />
-                <CurrencyConverter
-                  originalAmount={coinData.value}
-                  originalCurrency={coinData.currency}
-                />
+                {coinData.isCoin ? (
+                  <>
+                    <CoinResults
+                      imageUrl={uploadedImage}
+                      coinType={coinData.coinType!}
+                      country={coinData.country!}
+                      countryFlag={coinData.countryFlag!}
+                      denomination={coinData.denomination!}
+                      year={coinData.year}
+                      confidence={coinData.confidence}
+                      material={coinData.material}
+                      condition={coinData.condition}
+                      rarity={coinData.rarity}
+                      estimatedValue={coinData.estimatedValue}
+                      estimatedValueRange={coinData.estimatedValueRange}
+                      valueFactors={coinData.valueFactors}
+                    />
+                    <CurrencyConverter
+                      originalAmount={coinData.value!}
+                      originalCurrency={coinData.currency!}
+                    />
+                  </>
+                ) : (
+                  <div className="max-w-2xl mx-auto">
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-8 text-center space-y-4">
+                      <div className="relative rounded-lg overflow-hidden border mb-6">
+                        <img
+                          src={uploadedImage}
+                          alt="Uploaded image"
+                          className="w-full h-auto object-contain max-h-96 mx-auto"
+                          data-testid="img-not-coin-preview"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-bold text-destructive" data-testid="text-not-coin-title">
+                          Not a Coin
+                        </h3>
+                        <p className="text-lg" data-testid="text-actual-object">
+                          This appears to be <span className="font-semibold">{coinData.actualObject}</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-4">
+                          Please upload an image of a coin to get identification and value estimation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             ) : null}
           </div>
