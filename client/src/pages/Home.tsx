@@ -6,78 +6,55 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Coins, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { CoinAnalysis } from "@shared/schema";
 
 export default function Home() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [coinData, setCoinData] = useState<any>(null);
+  const [coinData, setCoinData] = useState<CoinAnalysis | null>(null);
   const { toast } = useToast();
 
-  const handleImageSelect = (file: File) => {
+  const handleImageSelect = async (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setUploadedImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const imageUrl = e.target?.result as string;
+      setUploadedImage(imageUrl);
       setIsAnalyzing(true);
 
-      // todo: remove mock functionality - simulate API call
-      setTimeout(() => {
-        // Mock coin identification results
-        const mockResults = [
-          {
-            coinType: "Quarter Dollar",
-            country: "United States",
-            countryFlag: "🇺🇸",
-            denomination: "25 Cents",
-            year: "2020",
-            confidence: 95,
-            material: "Copper-Nickel",
-            value: 0.25,
-            currency: "USD"
-          },
-          {
-            coinType: "1 Rupee Coin",
-            country: "India",
-            countryFlag: "🇮🇳",
-            denomination: "1 Rupee",
-            year: "2019",
-            confidence: 92,
-            material: "Stainless Steel",
-            value: 1,
-            currency: "INR"
-          },
-          {
-            coinType: "50 Euro Cent",
-            country: "European Union",
-            countryFlag: "🇪🇺",
-            denomination: "50 Cents",
-            year: "2018",
-            confidence: 89,
-            material: "Nordic Gold",
-            value: 0.50,
-            currency: "EUR"
-          },
-          {
-            coinType: "1 Pound Coin",
-            country: "United Kingdom",
-            countryFlag: "🇬🇧",
-            denomination: "1 Pound",
-            year: "2021",
-            confidence: 94,
-            material: "Bi-metallic",
-            value: 1,
-            currency: "GBP"
-          }
-        ];
+      try {
+        // Create form data for file upload
+        const formData = new FormData();
+        formData.append('image', file);
 
-        const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
-        setCoinData(randomResult);
+        // Call the API to analyze the coin
+        const response = await fetch('/api/analyze-coin', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to analyze coin');
+        }
+
+        const result: CoinAnalysis = await response.json();
+        setCoinData(result);
         setIsAnalyzing(false);
         
         toast({
           title: "Coin Identified!",
-          description: `Found: ${randomResult.coinType}`,
+          description: `Found: ${result.coinType}`,
         });
-      }, 1500);
+      } catch (error) {
+        console.error('Error analyzing coin:', error);
+        setIsAnalyzing(false);
+        toast({
+          title: "Analysis Failed",
+          description: error instanceof Error ? error.message : "Could not identify the coin. Please try again.",
+          variant: "destructive",
+        });
+        setUploadedImage(null);
+      }
     };
     reader.readAsDataURL(file);
   };

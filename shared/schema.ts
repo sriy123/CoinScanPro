@@ -16,3 +16,18 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Coin analysis response schema
+export const coinAnalysisSchema = z.object({
+  coinType: z.string(),
+  country: z.string(),
+  countryFlag: z.string(),
+  denomination: z.string(),
+  year: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  confidence: z.number().min(0).max(100).optional(),
+  material: z.string().optional(),
+  value: z.number(),
+  currency: z.string(),
+});
+
+export type CoinAnalysis = z.infer<typeof coinAnalysisSchema>;
