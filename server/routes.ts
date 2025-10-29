@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert buffer to base64
       const base64Image = req.file.buffer.toString('base64');
 
-      const systemPrompt = `You are an expert numismatist (coin expert) who can identify coins from images. 
+      const systemPrompt = `You are an expert numismatist (coin expert) who can identify coins from images and estimate their collector value. 
 Analyze the coin image and provide detailed information in JSON format with these exact fields:
 - coinType: the specific name/type of the coin (e.g., "Quarter Dollar", "1 Rupee Coin", "50 Euro Cent")
 - country: the country of origin (e.g., "United States", "India", "European Union")
@@ -49,6 +49,18 @@ Analyze the coin image and provide detailed information in JSON format with thes
 - material: the material composition if identifiable (e.g., "Copper-Nickel", "Stainless Steel")
 - value: the numeric face value in the original currency as a decimal number (e.g., 0.25 for a quarter, 1 for 1 rupee)
 - currency: the ISO currency code (e.g., "USD", "INR", "EUR")
+- condition: assess the physical condition (e.g., "Poor", "Fair", "Good", "Fine", "Very Fine", "Extremely Fine", "About Uncirculated", "Uncirculated")
+- rarity: assess the rarity (e.g., "Common", "Uncommon", "Scarce", "Rare", "Very Rare", "Extremely Rare")
+- estimatedValue: estimated collector/market value in USD as a number (e.g., 5.50 for $5.50)
+- estimatedValueRange: a range showing possible value variation (e.g., "$3-$8", "$50-$150")
+- valueFactors: array of factors affecting the value (e.g., ["Age (pre-1900)", "Excellent condition", "Low mintage", "Historical significance"])
+
+When estimating value, consider:
+1. Age: Older coins are often more valuable
+2. Rarity: Low mintage numbers, special editions, or errors increase value
+3. Condition: Better preserved coins command higher prices
+4. Historical significance: Coins from important periods or events
+5. Demand: Popular coins among collectors
 
 Be as accurate as possible. If you cannot identify the coin clearly, provide your best guess with a lower confidence score.`;
 
@@ -80,6 +92,14 @@ Be as accurate as possible. If you cannot identify the coin clearly, provide you
               material: { type: "string" },
               value: { type: "number" },
               currency: { type: "string" },
+              condition: { type: "string" },
+              rarity: { type: "string" },
+              estimatedValue: { type: "number" },
+              estimatedValueRange: { type: "string" },
+              valueFactors: { 
+                type: "array",
+                items: { type: "string" }
+              },
             },
             required: ["coinType", "country", "countryFlag", "denomination", "value", "currency"],
           },

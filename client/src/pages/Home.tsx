@@ -102,7 +102,7 @@ export default function Home() {
             <div className="text-center space-y-4 max-w-2xl mx-auto mb-12">
               <h2 className="text-4xl font-bold">Identify Any Coin Instantly</h2>
               <p className="text-lg text-muted-foreground">
-                Upload a photo of your coin to identify its type, country, denomination, and convert its value to any currency
+                Upload a photo of your coin to identify its type, country, denomination, and get an estimated collector value based on rarity, condition, and age
               </p>
             </div>
             <UploadZone onImageSelect={handleImageSelect} isAnalyzing={isAnalyzing} />
@@ -126,6 +126,11 @@ export default function Home() {
                   year={coinData.year}
                   confidence={coinData.confidence}
                   material={coinData.material}
+                  condition={coinData.condition}
+                  rarity={coinData.rarity}
+                  estimatedValue={coinData.estimatedValue}
+                  estimatedValueRange={coinData.estimatedValueRange}
+                  valueFactors={coinData.valueFactors}
                 />
                 <CurrencyConverter
                   originalAmount={coinData.value}

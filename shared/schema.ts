@@ -28,6 +28,11 @@ export const coinAnalysisSchema = z.object({
   material: z.string().optional(),
   value: z.number(),
   currency: z.string(),
+  condition: z.string().optional(),
+  rarity: z.string().optional(),
+  estimatedValue: z.number().optional(),
+  estimatedValueRange: z.string().optional(),
+  valueFactors: z.array(z.string()).optional(),
 });
 
 export type CoinAnalysis = z.infer<typeof coinAnalysisSchema>;
